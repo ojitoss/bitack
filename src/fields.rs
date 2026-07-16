@@ -50,3 +50,42 @@ pub(crate) fn resvoler(bits: Vec<BitField>) -> Vec<Resolvers> {
 
     masks
 }
+
+#[cfg(test)]
+mod test {
+    use super::*;
+
+    #[test]
+    fn resolver() {
+        let layout = vec![
+            BitField::Next(2),
+            BitField::Next(6),
+            BitField::Skip(4),
+            BitField::Next(4),
+        ];
+
+        let resolvers = resvoler(layout);
+        assert_eq!(3, resolvers.len());
+        for i in 0..3 {
+            let resolver = &resolvers[i];
+            match resolver {
+                Resolvers::Base { shift, mask } => {
+                    if i == 0 {
+                        assert_eq!(&0b11, mask);
+                        assert_eq!(&30, shift);
+                    }
+
+                    if i == 1 {
+                        assert_eq!(&0b00_111111, mask);
+                        assert_eq!(&24, shift);
+                    }
+
+                    if i == 2 {
+                        assert_eq!(&0b00000000_0000_1111, mask);
+                        assert_eq!(&16, shift);
+                    }
+                }
+            }
+        }
+    }
+}
