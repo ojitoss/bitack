@@ -16,15 +16,18 @@ impl BitScheme {
     }
 
     pub fn consume(self, origin_bytes: Vec<u8>) -> SchemeConsumer {
-        let bytes = origin_bytes.clone();
-
-        for i in 0..(4 - (bytes.len() % 4)) {
+        let mut bytes = origin_bytes.clone();
+        
+        // Add padding at the bytes to can be compressed exactly.
+        let max = (4 - bytes.len().min(4)) % 4;
+        for _ in 0..max {
             bytes.push(0);
         }
 
+        // Compress 'Vec<u8>' to 'Vec<u32>'.
         let bytes = bytes
             .chunks_exact(4)
-            .map(| chunk | u3i2::from_be_bytes(chunk[0..4]))
+            .map(| chunk | u32::from_be_bytes(chunk.try_into().unwrap()))
             .collect();
 
         SchemeConsumer {
