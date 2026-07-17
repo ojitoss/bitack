@@ -3,7 +3,7 @@ pub struct BitScheme {
     masks: Vec<fields::Resolvers>
 }
 
-pub struct SchemeConsumer<'a> {
+pub struct SchemeReader<'a> {
     bytes_added: i32,
     target: &'a BitScheme,
     bytes: Vec<u32>
@@ -16,7 +16,7 @@ impl BitScheme {
         }
     }
 
-    pub fn consume(&self, origin_bytes: Vec<u8>) -> SchemeConsumer {
+    pub fn read(&self, origin_bytes: Vec<u8>) -> SchemeReader {
         let mut bytes = origin_bytes.clone();
         
         // Add padding at the bytes to can be compressed exactly.
@@ -31,7 +31,7 @@ impl BitScheme {
             .map(| chunk | u32::from_be_bytes(chunk.try_into().unwrap()))
             .collect();
 
-        SchemeConsumer {
+        SchemeReader {
             bytes_added: max as i32,
             target: self,
             bytes
@@ -39,7 +39,7 @@ impl BitScheme {
     }
 }
 
-impl SchemeConsumer<'_> {
+impl SchemeReader<'_> {
     pub fn get(&self, index: usize) -> u32 {
         match self.target.masks[index] {
             fields::Resolvers::Base { shift, mask } => {
@@ -63,7 +63,7 @@ mod test {
             fields::BitField::Skip(4),
             fields::BitField::Next(4),
         ]);
-        let scheme = scheme.consume(vec![
+        let scheme = scheme.read(vec![
             0b10_000010,
             0b1101_1111,
             0b0,
@@ -85,7 +85,7 @@ mod test {
 
         for i in 1..=5 {
             zeros.push(0);
-            let consume = scheme.consume(zeros.clone());
+            let consume = scheme.read(zeros.clone());
             if i == 1 { assert_eq!(3, consume.bytes_added) }
             if i == 2 { assert_eq!(2, consume.bytes_added) }
             if i == 3 { assert_eq!(1, consume.bytes_added) }
