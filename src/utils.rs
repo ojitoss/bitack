@@ -1,6 +1,6 @@
 use std::ops::{BitOr, Shl};
 
-trait BitUint:
+pub(crate) trait BitUint:
     Copy
     + From<u8>
     + BitOr<Output = Self>
@@ -16,8 +16,8 @@ impl BitUint for u64 { const BITS: usize = 64; }
 impl BitUint for u128 { const BITS: usize = 128; }
 
 pub(crate) struct BitMaskInfo<T> {
-    shift: usize,
-    mask: T
+    pub(crate) shift: usize,
+    pub(crate) mask: T
 }
 
 pub(crate) fn left_bitmask_info<T>(bit_amount: usize) -> BitMaskInfo<T> where T: BitUint {
