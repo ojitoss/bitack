@@ -56,7 +56,7 @@ mod test {
     use super::*;
 
     #[test]
-    fn consumer_getter() {
+    fn reader_getter() {
         let scheme = BitScheme::new(vec![
             fields::BitField::Next(2),
             fields::BitField::Next(6),
@@ -69,10 +69,17 @@ mod test {
             0b0,
             0b0
         ]);
-        
-        assert_eq!(2, scheme.get(0));
-        assert_eq!(2, scheme.get(1));
-        assert_eq!(15, scheme.get(2));
+
+        let cases = vec![
+            2,
+            2,
+            15
+        ];
+
+        for i in 0..cases.len() {
+            let case = cases[i];
+            assert_eq!(case, scheme.get(i));
+        }
     }
 
     #[test]
@@ -83,14 +90,20 @@ mod test {
 
         let mut zeros: Vec<u8> = vec![];
 
-        for i in 1..=5 {
+        let cases = vec![
+            3, // len = 1
+            2, // len = 2
+            1, // len = 3
+            0, // len = 0
+            3  // len = 3
+        ];
+
+        for i in 0..5 {
             zeros.push(0);
             let consume = scheme.read(zeros.clone());
-            if i == 1 { assert_eq!(3, consume.bytes_added) }
-            if i == 2 { assert_eq!(2, consume.bytes_added) }
-            if i == 3 { assert_eq!(1, consume.bytes_added) }
-            if i == 4 { assert_eq!(0, consume.bytes_added) }
-            if i == 5 { assert_eq!(3, consume.bytes_added) }
+            let case = cases[i];
+
+            assert_eq!(case, consume.bytes_added);
         }
     }
 }
