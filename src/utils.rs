@@ -45,3 +45,40 @@ pub(crate) fn left_bitmask_info<T>(bit_amount: usize) -> BitMaskInfo<T> where T:
 
     BitMaskInfo { shift: 0, mask: T::from(0) }
 }
+
+#[cfg(test)]
+mod test {
+    use std::fmt::Debug;
+    use super::*;
+
+    fn left_bitsmak_pattern_uints<T>(cases: Vec<(usize, usize, T)>)
+    where
+        T: BitUint + Debug + PartialEq
+    {
+        for (bits, shift, mask) in cases {
+            let result = left_bitmask_info::<T>(bits);
+            assert_eq!(shift, result.shift);
+            assert_eq!(mask, result.mask);
+        }
+    }
+    #[test]
+    fn left_bitmask_uints() {
+        left_bitsmak_pattern_uints::<u8>(vec![
+            (1, 7, 0b10000000),
+            (4, 4, 0b11110000),
+            (8, 0, 0xff),
+        ]);
+
+        left_bitsmak_pattern_uints::<u16>(vec![
+            (1, 15, 0x8000),
+            (8, 8, 0xff00),
+            (16, 0, 0xffff),
+        ]);
+
+        left_bitsmak_pattern_uints::<u32>(vec![
+            (1, 31, 0x80000000),
+            (16, 16, 0xffff0000),
+            (32, 0, 0xffffffff),
+        ]);
+    }
+}
