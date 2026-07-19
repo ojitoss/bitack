@@ -53,17 +53,19 @@ mod test {
         let resolvers = resvoler(layout);
         assert_eq!(3, resolvers.len());
 
-        let cases: Vec<(&u32, &u32, usize)> = vec![
-            (&0b11, &30, 0),
-            (&0b00_111111, &24, 1),
-            (&0b00000000_0000_1111, &16, 2)
+        let cases: Vec<(&u32, &u32)> = vec![
+            (&0b11, &30),
+            (&0b00_111111, &24),
+            (&0b00000000_0000_1111, &16)
         ];
 
-        for (expected_mask, expected_shift, index) in cases {
-            let resolver = &resolvers[index];
+        for i in 0..cases.len() {
+            let resolver = &resolvers[i];
+            let (expected_mask, expected_shift) = cases[i];
 
             #[allow(irrefutable_let_patterns)]
             if let Resolvers::Base { shift, mask } = resolver {
+                println!("df");
                 assert_eq!(expected_shift, shift);
                 assert_eq!(expected_mask, mask);
             }
