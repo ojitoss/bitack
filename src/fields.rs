@@ -1,4 +1,4 @@
-use crate::utils::{left_bitmask_info};
+use crate::utils::bitmask::{left_bitmask_info};
 
 pub enum BitField {
     Next(u32),
