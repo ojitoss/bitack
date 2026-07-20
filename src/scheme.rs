@@ -37,6 +37,40 @@ impl BitScheme {
             bytes
         }
     }
+
+    pub fn write(&self, bytes: Vec<u32>) -> Vec<u8> {
+        let mut chunk = 0;
+        let mut acc = 0;
+        let mut write_bytes: Vec<u8> = vec![0, 0, 0, 0];
+
+        for i in 0..bytes.len() {
+            let byte = bytes[i];
+            let resolver = &self.masks[i];
+
+            match resolver {
+                fields::Resolvers::Base { shift, bits_amount, .. } => {
+                    let mask = byte << shift;
+                    let applieds_u8 = mask.to_be_bytes();
+                    let current_write_bytes_chunk = &mut write_bytes[chunk..(chunk + 4)];
+
+                    for j in 0..4 {
+                        let apply = applieds_u8[j];
+                        current_write_bytes_chunk[j] |= apply;
+                    }
+
+                    acc += bits_amount;
+                }
+            }
+
+            if acc >= 32 {
+                acc -= 32;
+                chunk += 1;
+                for _ in 0..4 { write_bytes.push(0) }
+            }
+        }
+        
+        write_bytes
+    }
 }
 
 impl SchemeReader<'_> {
