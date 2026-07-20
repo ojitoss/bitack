@@ -5,11 +5,11 @@ pub(crate) struct BitMaskInfo<T> {
     pub(crate) mask: T
 }
 
-pub(crate) fn left_bitmask_info<T>(bit_amount: usize) -> BitMaskInfo<T> where T: BitUint {
-    println!("{}", bit_amount);
+pub(crate) fn left_bitmask_info<T>(bits_amount: usize) -> BitMaskInfo<T> where T: BitUint {
+    println!("{}", bits_amount);
     let bits_minus_one = T::BITS - 1;
     let mut current_mask = T::from(0);
-    for i in 0..bit_amount {
+    for i in 0..bits_amount {
         /*
          * Select the left-most bit in relative to the 'index'.
          * Formula: 1 << ((bits - 1) - i)
@@ -22,8 +22,8 @@ pub(crate) fn left_bitmask_info<T>(bit_amount: usize) -> BitMaskInfo<T> where T:
         let mask = T::from(1) << (bits_minus_one - i);
         current_mask = current_mask | mask;
 
-        if i == (bit_amount - 1) {
-            let shift = T::BITS - bit_amount;
+        if i == (bits_amount - 1) {
+            let shift = T::BITS - bits_amount;
             return BitMaskInfo { shift, mask: current_mask }
         }
     };

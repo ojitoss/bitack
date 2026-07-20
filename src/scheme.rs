@@ -42,7 +42,7 @@ impl BitScheme {
 impl SchemeReader<'_> {
     pub fn get(&self, index: usize) -> u32 {
         match self.target.masks[index] {
-            fields::Resolvers::Base { shift, mask } => {
+            fields::Resolvers::Base { shift, mask, .. } => {
                 let byte_index = ((index as f64) / 4.0).trunc() as usize;
                 let shifted = self.bytes[byte_index] >> shift;    
                 return shifted & mask;

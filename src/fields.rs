@@ -8,7 +8,8 @@ pub enum BitField {
 pub(crate) enum Resolvers {
     Base {
         shift: u32,
-        mask: u32
+        mask: u32,
+        bits_amount: u32
     }
 }
 
@@ -18,15 +19,17 @@ pub(crate) fn resvoler(bits: Vec<BitField>) -> Vec<Resolvers> {
 
     for bit in &bits {
         match bit {
-            BitField::Next(bit_amount) => {
-                let mask_info = left_bitmask_info::<u32>(*bit_amount as usize);
+            BitField::Next(bits_amount) => {
+                let bits_amount = *bits_amount;
+                let mask_info = left_bitmask_info::<u32>(bits_amount as usize);
 
                 masks.push(Resolvers::Base {
                     shift: (mask_info.shift - (acc as usize)) as u32,
-                    mask: mask_info.mask >> mask_info.shift
+                    mask: mask_info.mask >> mask_info.shift,
+                    bits_amount
                 });
                 
-                acc += bit_amount;
+                acc += bits_amount;
             },
             BitField::Skip(bit_amount) => {
                 acc += bit_amount;
@@ -64,8 +67,7 @@ mod test {
             let (expected_mask, expected_shift) = cases[i];
 
             #[allow(irrefutable_let_patterns)]
-            if let Resolvers::Base { shift, mask } = resolver {
-                println!("df");
+            if let Resolvers::Base { shift, mask, .. } = resolver {
                 assert_eq!(expected_shift, shift);
                 assert_eq!(expected_mask, mask);
             }
