@@ -90,19 +90,20 @@ mod test {
     use super::*;
 
     #[test]
-    fn reader_getter() {
+    fn reader_and_writter() {
         let scheme = BitScheme::new(vec![
             fields::BitField::Next(2),
             fields::BitField::Next(6),
             fields::BitField::Skip(4),
             fields::BitField::Next(4),
         ]);
-        let scheme = scheme.read(vec![
+
+        let origin_bytes = vec![
             0b10_000010,
-            0b1101_1111,
+            0b0000_1111,
             0b0,
             0b0
-        ]);
+        ];
 
         let cases = vec![
             2,
@@ -110,10 +111,15 @@ mod test {
             15
         ];
 
+        let to_read_bytes = scheme.read(origin_bytes.clone());
+        let writted_bytes = scheme.write(cases.clone());
+
         for i in 0..cases.len() {
             let case = cases[i];
-            assert_eq!(case, scheme.get(i));
+            assert_eq!(case, to_read_bytes.get(i));
         }
+        
+        assert_eq!(writted_bytes, origin_bytes);
     }
 
     #[test]
