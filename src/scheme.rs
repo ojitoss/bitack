@@ -94,8 +94,8 @@ mod test {
             3, // len = 1
             2, // len = 2
             1, // len = 3
-            0, // len = 0
-            3  // len = 3
+            0, // len = 4
+            3  // len = 5
         ];
 
         for i in 0..5 {
