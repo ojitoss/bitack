@@ -1,5 +1,7 @@
 mod reader;
+mod writter;
 use reader::Reader;
+use writter::Writter;
 use crate::fields;
 
 pub struct BitScheme {
@@ -35,7 +37,7 @@ impl BitScheme {
         }
     }
 
-    pub fn write(&self, bytes: Vec<u32>) -> Vec<u8> {
+    pub fn write(&self, bytes: Vec<u32>) -> Writter {
         let mut chunk = 0;
         let mut acc = 0;
         let mut write_bytes: Vec<u8> = vec![0, 0, 0, 0];
@@ -65,8 +67,13 @@ impl BitScheme {
                 for _ in 0..4 { write_bytes.push(0) }
             }
         }
-        
-        write_bytes
+
+        let bytes_added = if (acc % 8) == 0 { acc / 8 } else { (((acc as f64) / 8.0).trunc() as u32) + 1 };
+
+        Writter {
+            bytes: write_bytes,
+            bytes_added
+        }
     }
 }
 
@@ -104,7 +111,7 @@ mod test {
             assert_eq!(case, to_read_bytes.get(i));
         }
         
-        assert_eq!(writted_bytes, origin_bytes);
+        assert_eq!(writted_bytes.unwrap(true), origin_bytes);
     }
 
     #[test]
