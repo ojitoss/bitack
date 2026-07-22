@@ -5,9 +5,9 @@ pub struct Writter {
 
 impl Writter {
     pub fn unwrap(&self, padding: bool) -> Vec<u8> {
-        if padding { return self.bytes.clone() };
-
         let mut bytes = self.bytes.clone();
+        
+        if padding { return bytes };
 
         for _ in 0..self.bytes_added {
             bytes.pop();
