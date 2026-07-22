@@ -11,8 +11,9 @@ impl Reader<'_> {
         match self.target.masks[index] {
             fields::Resolvers::Base { shift, mask, .. } => {
                 let byte_index = ((index as f64) / 4.0).trunc() as usize;
-                let shifted = self.bytes[byte_index] >> shift;    
-                return shifted & mask;
+                let shifted = self.bytes[byte_index] >> shift;
+                
+                shifted & mask
             }   
         }
     }
