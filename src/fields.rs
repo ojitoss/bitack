@@ -13,27 +13,51 @@ pub(crate) enum Resolvers {
     }
 }
 
-pub(crate) fn resvoler(bits: Vec<BitField>) -> Vec<Resolvers> {
-    let mut acc: u32 = 0;
-    let mut masks: Vec<Resolvers> = vec![];
+pub(crate) struct ResolverOutput {
+    resolver: Option< Resolvers>,
+    acc: u32
+}
 
-    for bit in &bits {
-        match bit {
+impl BitField {
+    pub fn resolve(&self, acc: u32) -> ResolverOutput {
+        match self {
             BitField::Next(bits_amount) => {
                 let bits_amount = *bits_amount;
                 let mask_info = left_bitmask_info::<u32>(bits_amount as usize);
 
-                masks.push(Resolvers::Base {
+                let resolver = Resolvers::Base {
                     shift: (mask_info.shift - (acc as usize)) as u32,
                     mask: mask_info.mask >> mask_info.shift,
                     bits_amount
-                });
-                
-                acc += bits_amount;
+                };
+
+                ResolverOutput {
+                    resolver: Some(resolver),
+                    acc: acc + bits_amount
+                }
             },
-            BitField::Skip(bit_amount) => {
-                acc += bit_amount;
+            BitField::Skip(bits_amount) => {
+                ResolverOutput {
+                    resolver: None,
+                    acc: acc + bits_amount
+                }
             }
+        }
+    }
+}
+
+pub(crate) fn resvoler(bits: Vec<BitField>) -> Vec<Resolvers> {
+    let mut masks: Vec<Resolvers> = vec![];
+    let mut resolver = ResolverOutput {
+        resolver: None,
+        acc: 0
+    };
+
+    for bit in &bits {
+        resolver = bit.resolve(resolver.acc);
+        
+        if let Some(resolver) = resolver.resolver {
+            masks.push(resolver);
         }
     }
 
