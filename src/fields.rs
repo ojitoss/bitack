@@ -1,4 +1,4 @@
-use crate::utils::bitmask::{left_bitmask_info};
+use crate::{fields, utils::bitmask::left_bitmask_info};
 
 pub enum BitField {
     Next(u32),
@@ -46,15 +46,15 @@ impl BitField {
     }
 }
 
-pub(crate) fn resvoler(bits: Vec<BitField>) -> Vec<Resolvers> {
+pub(crate) fn resvoler(fields: Vec<BitField>) -> Vec<Resolvers> {
     let mut masks: Vec<Resolvers> = vec![];
     let mut resolver = ResolverOutput {
         resolver: None,
         acc: 0
     };
 
-    for bit in &bits {
-        resolver = bit.resolve(resolver.acc);
+    for field in &fields {
+        resolver = field.resolve(resolver.acc);
         
         if let Some(resolver) = resolver.resolver {
             masks.push(resolver);
