@@ -45,3 +45,32 @@ impl BitField {
         }
     }
 }
+
+#[cfg(test)]
+mod test {
+    use super::*;
+
+    fn unwrap_resolver_info(resolver: &ResolverOutput) -> (u32, u32) {
+        if let Some(y) = &resolver.resolver {
+            #[allow(irrefutable_let_patterns)]
+            if let Resolvers::Base { mask, shift, .. } = y { return (*mask, *shift) };
+        }
+
+        (0, 0)
+    }
+
+    #[test]
+    fn resolver() {
+        let cases = vec![
+            (BitField::Next(8).resolve(0), 0xFF, 24),
+            (BitField::Next(3).resolve(0), 0b111, 29),
+            (BitField::Next(3).resolve(5), 0b111, 24),
+        ];
+        
+        for (resolver, expected_mask, expected_shift) in cases {
+            let (mask, shift) = unwrap_resolver_info(&resolver);
+            assert_eq!(expected_mask, mask);
+            assert_eq!(expected_shift, shift);
+        }
+    }
+}
