@@ -9,10 +9,22 @@ pub struct BitScheme {
 }
 
 impl BitScheme {
-    pub fn new(bits: Vec<fields::BitField>) -> Self {
-        BitScheme { 
-            masks: fields::resvoler(bits) 
+    pub fn new(fields: Vec<fields::BitField>) -> Self {
+        let mut masks: Vec<fields::Resolvers> = vec![];
+        let mut resolver = fields::ResolverOutput {
+            resolver: None,
+            acc: 0
+        };
+
+        for field in &fields {
+            resolver = field.resolve(resolver.acc);
+            
+            if let Some(resolver) = resolver.resolver {
+                masks.push(resolver);
+            }
         }
+
+        BitScheme { masks }
     }
 
     pub fn read(&self, origin_bytes: Vec<u8>) -> Reader {

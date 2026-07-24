@@ -1,4 +1,4 @@
-use crate::{fields, utils::bitmask::left_bitmask_info};
+use crate::{utils::bitmask::left_bitmask_info};
 
 pub enum BitField {
     Next(u32),
@@ -14,8 +14,8 @@ pub(crate) enum Resolvers {
 }
 
 pub(crate) struct ResolverOutput {
-    resolver: Option< Resolvers>,
-    acc: u32
+    pub(crate) resolver: Option< Resolvers>,
+    pub(crate) acc: u32
 }
 
 impl BitField {
@@ -41,59 +41,6 @@ impl BitField {
                     resolver: None,
                     acc: acc + bits_amount
                 }
-            }
-        }
-    }
-}
-
-pub(crate) fn resvoler(fields: Vec<BitField>) -> Vec<Resolvers> {
-    let mut masks: Vec<Resolvers> = vec![];
-    let mut resolver = ResolverOutput {
-        resolver: None,
-        acc: 0
-    };
-
-    for field in &fields {
-        resolver = field.resolve(resolver.acc);
-        
-        if let Some(resolver) = resolver.resolver {
-            masks.push(resolver);
-        }
-    }
-
-    masks
-}
-
-#[cfg(test)]
-mod test {
-    use super::*;
-
-    #[test]
-    fn resolver() {
-        let layout = vec![
-            BitField::Next(2),
-            BitField::Next(6),
-            BitField::Skip(4),
-            BitField::Next(4),
-        ];
-
-        let resolvers = resvoler(layout);
-        assert_eq!(3, resolvers.len());
-
-        let cases: Vec<(&u32, &u32)> = vec![
-            (&0b11, &30),
-            (&0b00_111111, &24),
-            (&0b00000000_0000_1111, &16)
-        ];
-
-        for i in 0..cases.len() {
-            let resolver = &resolvers[i];
-            let (expected_mask, expected_shift) = cases[i];
-
-            #[allow(irrefutable_let_patterns)]
-            if let Resolvers::Base { shift, mask, .. } = resolver {
-                assert_eq!(expected_shift, shift);
-                assert_eq!(expected_mask, mask);
             }
         }
     }
