@@ -7,10 +7,30 @@ pub(crate) trait BitUint:
     + Shl<usize, Output = Self>
 {
     const BITS: usize;
+    const MAX: Self;
 }
 
-impl BitUint for u8  { const BITS: usize = 8; }
-impl BitUint for u16 { const BITS: usize = 16; }
-impl BitUint for u32 { const BITS: usize = 32; }
-impl BitUint for u64 { const BITS: usize = 64; }
-impl BitUint for u128 { const BITS: usize = 128; }
+impl BitUint for u8  { 
+    const BITS: usize = 8; 
+    const MAX: Self = !0;
+}
+
+impl BitUint for u16 { 
+    const BITS: usize = 16;
+    const MAX: Self = !0;
+}
+
+impl BitUint for u32 { 
+    const BITS: usize = 32;
+    const MAX: Self = !0;
+}
+
+impl BitUint for u64 { 
+    const BITS: usize = 64; 
+    const MAX: Self = !0;
+}
+
+impl BitUint for u128 {
+    const BITS: usize = 128;
+    const MAX: Self = !0;
+}

@@ -42,28 +42,32 @@ mod test {
     {
         for (bits, shift, mask) in cases {
             let result = left_bitmask_info::<T>(bits);
+
             assert_eq!(shift, result.shift);
             assert_eq!(mask, result.mask);
         }
     }
+
+    fn left_bitmask_tested_pattern<T>()
+    where 
+        T: BitUint + Debug + PartialEq
+    {
+        let minus_one = T::BITS - 1;
+        let half =  T::BITS / 2;
+
+        left_bitsmak_pattern_uints(vec![
+            (1, minus_one,T::from(1) << minus_one),
+            (half, half, T::MAX << half),
+            (T::BITS, 0, T::MAX)
+        ]);
+    }
+
     #[test]
     fn left_bitmask_uints() {
-        left_bitsmak_pattern_uints::<u8>(vec![
-            (1, 7, 0b10000000),
-            (4, 4, 0b11110000),
-            (8, 0, 0xff),
-        ]);
+        left_bitmask_tested_pattern::<u8>();
 
-        left_bitsmak_pattern_uints::<u16>(vec![
-            (1, 15, 0x8000),
-            (8, 8, 0xff00),
-            (16, 0, 0xffff),
-        ]);
+        left_bitmask_tested_pattern::<u16>();
 
-        left_bitsmak_pattern_uints::<u32>(vec![
-            (1, 31, 0x80000000),
-            (16, 16, 0xffff0000),
-            (32, 0, 0xffffffff),
-        ]);
+        left_bitmask_tested_pattern::<u32>();
     }
 }
