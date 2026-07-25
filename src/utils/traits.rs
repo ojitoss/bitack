@@ -1,10 +1,12 @@
-use std::ops::{BitOr, Shl};
+use std::{fmt::Debug, ops::{BitOr, Shl}};
 
 pub(crate) trait BitUint:
     Copy
     + From<u8>
     + BitOr<Output = Self>
     + Shl<usize, Output = Self>
+    + Debug
+    + PartialEq
 {
     const BITS: usize;
     const MAX: Self;

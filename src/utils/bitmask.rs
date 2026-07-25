@@ -33,13 +33,9 @@ pub(crate) fn left_bitmask_info<T>(bits_amount: usize) -> BitMaskInfo<T> where T
 
 #[cfg(test)]
 mod test {
-    use std::fmt::Debug;
     use super::*;
 
-    fn left_bitsmak_pattern_uints<T>(cases: Vec<(usize, usize, T)>)
-    where
-        T: BitUint + Debug + PartialEq
-    {
+    fn left_bitsmak_pattern_uints<T>(cases: Vec<(usize, usize, T)>)  where T: BitUint {
         for (bits, shift, mask) in cases {
             let result = left_bitmask_info::<T>(bits);
 
@@ -48,10 +44,7 @@ mod test {
         }
     }
 
-    fn left_bitmask_tested_pattern<T>()
-    where 
-        T: BitUint + Debug + PartialEq
-    {
+    fn left_bitmask_tested_pattern<T>() where T: BitUint {
         let minus_one = T::BITS - 1;
         let half =  T::BITS / 2;
 
