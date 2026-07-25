@@ -5,9 +5,18 @@ pub(crate) struct BitMaskInfo<T> {
     pub(crate) mask: T
 }
 
-pub(crate) fn left_bitmask_info<T>(bits_amount: usize) -> BitMaskInfo<T> where T: BitUint {
+pub(crate) enum BitShift {
+    Left,
+    Right
+}
+
+pub(crate) fn bitmask_info<T>(bits_amount: usize, shift_type: BitShift) -> BitMaskInfo<T> where T: BitUint {
     let shift = T::BITS - bits_amount;
-    let mask = T::MAX << shift;
+    
+    let mask = match shift_type {
+        BitShift::Left => T::MAX << shift,
+        BitShift::Right => T::MAX >> shift
+    };
 
     BitMaskInfo { shift, mask }
 }
@@ -18,7 +27,7 @@ mod test {
 
     fn left_bitsmak_pattern_uints<T>(cases: Vec<(usize, usize, T)>)  where T: BitUint {
         for (bits, shift, mask) in cases {
-            let result = left_bitmask_info::<T>(bits);
+            let result = bitmask_info::<T>(bits, BitShift::Left);
 
             assert_eq!(shift, result.shift);
             assert_eq!(mask, result.mask);

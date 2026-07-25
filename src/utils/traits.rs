@@ -1,10 +1,11 @@
-use std::{fmt::Debug, ops::{BitOr, Shl}};
+use std::{fmt::Debug, ops::{BitOr, Shl, Shr}};
 
 pub(crate) trait BitUint:
     Copy
     + From<u8>
     + BitOr<Output = Self>
     + Shl<usize, Output = Self>
+    + Shr<usize, Output = Self>
     + Debug
     + PartialEq
 {
