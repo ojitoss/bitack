@@ -65,9 +65,9 @@ mod test {
     #[test]
     fn left_bitmask_uints() {
         left_bitmask_tested_pattern::<u8>();
-
         left_bitmask_tested_pattern::<u16>();
-
         left_bitmask_tested_pattern::<u32>();
+        left_bitmask_tested_pattern::<u64>();
+        left_bitmask_tested_pattern::<u128>();   
     }
 }
