@@ -6,17 +6,17 @@ pub(crate) struct BitMaskInfo<T> {
 }
 
 #[derive(Clone, Copy)]
-pub(crate) enum BitShift {
+pub(crate) enum BitShiftDirection {
     Left,
     Right
 }
 
-pub(crate) fn bitmask_info<T>(bits_amount: usize, shift_type: BitShift) -> BitMaskInfo<T> where T: BitUint {
+pub(crate) fn bitmask_info<T>(bits_amount: usize, shift_type: BitShiftDirection) -> BitMaskInfo<T> where T: BitUint {
     let shift = T::BITS - bits_amount;
 
     let mask = match shift_type {
-        BitShift::Left => T::MAX << shift,
-        BitShift::Right => T::MAX >> shift
+        BitShiftDirection::Left => T::MAX << shift,
+        BitShiftDirection::Right => T::MAX >> shift
     };
 
     BitMaskInfo { shift, mask }
@@ -26,7 +26,7 @@ pub(crate) fn bitmask_info<T>(bits_amount: usize, shift_type: BitShift) -> BitMa
 mod test {
     use super::*;
 
-    fn bitsmak_pattern_uints<T>(cases: Vec<(usize, usize, T)>, shift_type: BitShift)  where T: BitUint {
+    fn bitsmak_pattern_uints<T>(cases: Vec<(usize, usize, T)>, shift_type: BitShiftDirection)  where T: BitUint {
         for (bits, shift, mask) in cases {
             let result = bitmask_info::<T>(bits, shift_type);
 
@@ -35,7 +35,7 @@ mod test {
         }
     }
 
-    fn bitmask_tested_pattern<T>(shift_type: BitShift) where T: BitUint {
+    fn bitmask_tested_pattern<T>(shift_type: BitShiftDirection) where T: BitUint {
         let minus_one = T::BITS - 1;
         let half =  T::BITS / 2;
 
@@ -46,11 +46,11 @@ mod test {
         ];
 
         match shift_type {
-            BitShift::Left => {
+            BitShiftDirection::Left => {
                 cases[0].2 = T::from(1) << minus_one;
                 cases[1].2 = T::MAX << half;
             },
-            BitShift::Right => {
+            BitShiftDirection::Right => {
                 cases[0].2 = T::MAX >> minus_one;
                 cases[1].2 = T::MAX >> half;
             }
@@ -61,19 +61,19 @@ mod test {
 
     #[test]
     fn left_bitmask_uints() {
-        bitmask_tested_pattern::<u8>(BitShift::Left);
-        bitmask_tested_pattern::<u16>(BitShift::Left);
-        bitmask_tested_pattern::<u32>(BitShift::Left);
-        bitmask_tested_pattern::<u64>(BitShift::Left);
-        bitmask_tested_pattern::<u128>(BitShift::Left);   
+        bitmask_tested_pattern::<u8>(BitShiftDirection::Left);
+        bitmask_tested_pattern::<u16>(BitShiftDirection::Left);
+        bitmask_tested_pattern::<u32>(BitShiftDirection::Left);
+        bitmask_tested_pattern::<u64>(BitShiftDirection::Left);
+        bitmask_tested_pattern::<u128>(BitShiftDirection::Left);   
     }
 
     #[test]
     fn right_bitmask_uints() {
-        bitmask_tested_pattern::<u8>(BitShift::Right);
-        bitmask_tested_pattern::<u16>(BitShift::Right);
-        bitmask_tested_pattern::<u32>(BitShift::Right);
-        bitmask_tested_pattern::<u64>(BitShift::Right);
-        bitmask_tested_pattern::<u128>(BitShift::Right);   
+        bitmask_tested_pattern::<u8>(BitShiftDirection::Right);
+        bitmask_tested_pattern::<u16>(BitShiftDirection::Right);
+        bitmask_tested_pattern::<u32>(BitShiftDirection::Right);
+        bitmask_tested_pattern::<u64>(BitShiftDirection::Right);
+        bitmask_tested_pattern::<u128>(BitShiftDirection::Right);   
     }
 }
