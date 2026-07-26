@@ -1,8 +1,8 @@
 use crate::utils::traits::{BitUint};
 
-pub(crate) struct BitMaskInfo<T> {
+pub(crate) struct BitMaskApplicator<T: BitUint> {
     pub(crate) shift: usize,
-    pub(crate) mask: T
+    pub(crate) mask: T,
 }
 
 #[derive(Clone, Copy)]
@@ -11,15 +11,25 @@ pub(crate) enum BitShiftDirection {
     Right
 }
 
-pub(crate) fn bitmask_info<T>(bits_amount: usize, shift_type: BitShiftDirection) -> BitMaskInfo<T> where T: BitUint {
-    let shift = T::BITS - bits_amount;
+impl<T: BitUint> BitMaskApplicator<T> {
+    fn new(bits_amount: usize, shift_type: BitShiftDirection) -> Self {
+        let shift = T::BITS - bits_amount;
 
-    let mask = match shift_type {
-        BitShiftDirection::Left => T::MAX << shift,
-        BitShiftDirection::Right => T::MAX >> shift
-    };
+        let mask = match shift_type {
+            BitShiftDirection::Left => T::MAX << shift,
+            BitShiftDirection::Right => T::MAX >> shift
+        };
 
-    BitMaskInfo { shift, mask }
+        Self { shift, mask }
+    }
+
+    pub fn from_left(bits_amount: usize) -> Self {
+        Self::new(bits_amount, BitShiftDirection::Left)
+    }
+
+    pub fn from_right(bits_amount: usize) -> Self {
+        Self::new(bits_amount, BitShiftDirection::Right)
+    }
 }
 
 #[cfg(test)]
@@ -28,7 +38,7 @@ mod test {
 
     fn bitsmak_pattern_uints<T>(cases: Vec<(usize, usize, T)>, shift_type: BitShiftDirection)  where T: BitUint {
         for (bits, shift, mask) in cases {
-            let result = bitmask_info::<T>(bits, shift_type);
+            let result = BitMaskApplicator::<T>::new(bits, shift_type);
 
             assert_eq!(shift, result.shift);
             assert_eq!(mask, result.mask);

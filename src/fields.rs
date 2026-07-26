@@ -1,4 +1,4 @@
-use crate::{utils::bitmask::{bitmask_info, BitShiftDirection}};
+use crate::{utils::bitmask::{BitMaskApplicator}};
 
 pub enum BitField {
     Next(u32),
@@ -14,7 +14,7 @@ pub(crate) enum Resolvers {
 }
 
 pub(crate) struct ResolverOutput {
-    pub(crate) resolver: Option< Resolvers>,
+    pub(crate) resolver: Option<Resolvers>,
     pub(crate) acc: u32
 }
 
@@ -23,7 +23,7 @@ impl BitField {
         match self {
             BitField::Next(bits_amount) => {
                 let bits_amount = *bits_amount;
-                let mask_info = bitmask_info::<u32>(bits_amount as usize, BitShiftDirection::Right);
+                let mask_info = BitMaskApplicator::<u32>::from_right(bits_amount as usize);
 
                 let resolver = Resolvers::Base {
                     shift: (mask_info.shift - (acc as usize)) as u32,
