@@ -23,11 +23,11 @@ impl BitField {
         match self {
             BitField::Next(bits_amount) => {
                 let bits_amount = *bits_amount;
-                let mask_info = bitmask_info::<u32>(bits_amount as usize, BitShift::Left);
+                let mask_info = bitmask_info::<u32>(bits_amount as usize, BitShift::Right);
 
                 let resolver = Resolvers::Base {
                     shift: (mask_info.shift - (acc as usize)) as u32,
-                    mask: mask_info.mask >> mask_info.shift,
+                    mask: mask_info.mask,
                     bits_amount
                 };
 
@@ -51,9 +51,11 @@ mod test {
     use super::*;
 
     fn unwrap_resolver_info(resolver: &ResolverOutput) -> (u32, u32) {
-        if let Some(y) = &resolver.resolver {
+        if let Some(type_resolver) = &resolver.resolver {
             #[allow(irrefutable_let_patterns)]
-            if let Resolvers::Base { mask, shift, .. } = y { return (*mask, *shift) };
+            if let Resolvers::Base { mask, shift, .. } = type_resolver { 
+                return (*mask, *shift) 
+            };
         }
 
         (0, 0)
@@ -69,6 +71,7 @@ mod test {
         
         for (resolver, expected_mask, expected_shift) in cases {
             let (mask, shift) = unwrap_resolver_info(&resolver);
+            
             assert_eq!(expected_mask, mask);
             assert_eq!(expected_shift, shift);
         }
