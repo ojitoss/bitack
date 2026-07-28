@@ -94,9 +94,11 @@ mod test {
 
     fn unwrap_resolver_info(resolver: &ResolverOutput) -> (u32, u32) {
         if let Some(type_resolver) = &resolver.resolver {
-            if let Resolver::Base { mask, shift, .. } = type_resolver { 
-                return (*mask, *shift) 
-            };
+            match type_resolver {
+                Resolver::Base { mask, shift, .. } => { return (*mask, *shift) },
+                Resolver::LeadingOnes { shift, mask, .. } => { return (*mask, *shift) }
+                Resolver::LeadingZeros { shift, mask, .. } => { return (*mask, *shift) }
+            }
         }
 
         (0, 0)
@@ -108,6 +110,8 @@ mod test {
             (BitField::Next(8).resolve(0), 0xFF, 24),
             (BitField::Next(3).resolve(0), 0b111, 29),
             (BitField::Next(3).resolve(5), 0b111, 24),
+            (BitField::LeadingOnes(4).resolve(0), 0xF0_00_00_00, 0),
+            (BitField::LeadingZeros(4).resolve(8), 0x00_F0_00_00, 8),
         ];
         
         for (resolver, expected_mask, expected_shift) in cases {
