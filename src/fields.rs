@@ -1,20 +1,32 @@
-use crate::{utils::bitmask::{BitMaskApplicator}};
+use crate::{utils::bitmask::BitMaskApplicator};
 
 pub enum BitField {
     Next(u32),
-    Skip(u32)
+    Skip(u32),
+    LeadingZeros(u32),
+    LeadingOnes(u32)
 }
 
-pub(crate) enum Resolvers {
+pub(crate) enum Resolver {
     Base {
         shift: u32,
         mask: u32,
         bits_amount: u32
-    }
+    },
+    LeadingOnes {
+        shift: u32,
+        mask: u32,
+        bits_amount: u32
+    },
+    LeadingZeros {
+        shift: u32,
+        mask: u32,
+        bits_amount: u32
+    },
 }
 
 pub(crate) struct ResolverOutput {
-    pub(crate) resolver: Option<Resolvers>,
+    pub(crate) resolver: Option<Resolver>,
     pub(crate) acc: u32
 }
 
@@ -25,7 +37,7 @@ impl BitField {
                 let bits_amount = *bits_amount;
                 let mask_info = BitMaskApplicator::<u32>::from_right(bits_amount as usize);
 
-                let resolver = Resolvers::Base {
+                let resolver = Resolver::Base {
                     shift: (mask_info.shift - (acc as usize)) as u32,
                     mask: mask_info.mask,
                     bits_amount
@@ -41,7 +53,37 @@ impl BitField {
                     resolver: None,
                     acc: acc + bits_amount
                 }
-            }
+            },
+            BitField::LeadingOnes(bits_amount) => {
+                let bits_amount = *bits_amount;
+                let mask_info = BitMaskApplicator::<u32>::from_left(bits_amount as usize);
+
+                let resolver = Resolver::LeadingOnes { 
+                    shift: acc,
+                    mask: mask_info.mask >> acc,
+                    bits_amount
+                 };
+
+                ResolverOutput { 
+                    resolver: Some(resolver), 
+                    acc: acc + bits_amount
+                }
+            },
+            BitField::LeadingZeros(bits_amount) => {
+                let bits_amount = *bits_amount;
+                let mask_info = BitMaskApplicator::<u32>::from_left(bits_amount as usize);
+
+                let resolver = Resolver::LeadingZeros { 
+                    shift: acc,
+                    mask: mask_info.mask >> acc,
+                    bits_amount
+                 };
+
+                ResolverOutput { 
+                    resolver: Some(resolver), 
+                    acc: acc + bits_amount,
+                }
+            },
         }
     }
 }
@@ -52,8 +94,7 @@ mod test {
 
     fn unwrap_resolver_info(resolver: &ResolverOutput) -> (u32, u32) {
         if let Some(type_resolver) = &resolver.resolver {
-            #[allow(irrefutable_let_patterns)]
-            if let Resolvers::Base { mask, shift, .. } = type_resolver { 
+            if let Resolver::Base { mask, shift, .. } = type_resolver { 
                 return (*mask, *shift) 
             };
         }

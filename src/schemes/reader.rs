@@ -8,13 +8,13 @@ pub struct Reader<'a> {
 
 impl Reader<'_> {
     pub fn get(&self, index: usize) -> u32 {
+        let byte_index = ((index as f64) / 4.0).trunc() as usize;
+        let byte = self.bytes[byte_index];
+
         match self.target.masks[index] {
-            fields::Resolvers::Base { shift, mask, .. } => {
-                let byte_index = ((index as f64) / 4.0).trunc() as usize;
-                let shifted = self.bytes[byte_index] >> shift;
-                
-                shifted & mask
-            }   
+            fields::Resolver::Base { shift, mask, .. } => (byte >> shift) & mask,
+            fields::Resolver::LeadingOnes { shift, mask, .. } => ((byte & mask) << shift).leading_ones(),
+            fields::Resolver::LeadingZeros { shift, mask, .. } => ((byte & mask) << shift).leading_zeros(),
         }
     }
 }
