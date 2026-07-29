@@ -62,12 +62,11 @@ impl BitScheme {
             let applicator = &resolver.applicator;
             let MaskChunks { left, bits, .. } = applicator.get_chunks();
 
-            match resolver.resolver {
+            let mask = match resolver.resolver {
                 fields::ResolverType::Base => {
                     let mask = byte << (applicator.bits_len_diff - left);
-                    let mask = mask & applicator.mask;
-
-                    Writter::write_in_loop(&mut write_bytes, acc, chunk, mask, bits);
+                    
+                    mask & applicator.mask
                 }
                 fields::ResolverType::LeadingOnes => {
                     let mut mask = applicator.mask;
@@ -77,14 +76,18 @@ impl BitScheme {
                         mask &= !pos;
                     }
 
-                    Writter::write_in_loop(&mut write_bytes, acc, chunk, mask, bits);
+                    mask
                 }
                 fields::ResolverType::LeadingZeros => {
-                    let mask = 0 | (1 << (31 - (left + byte)));
+                    let cut_point = 1 << (31 - (left + byte));
 
-                    Writter::write_in_loop(&mut write_bytes, acc, chunk, mask, bits);
+                    0 | cut_point
                 }
-            }
+            };
+
+            Writter::write_in_loop(&mut write_bytes, chunk, mask);
+            
+            acc += bits;
 
             if acc >= 32 {
                 acc -= 32;
