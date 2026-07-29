@@ -1,4 +1,5 @@
-use crate::{utils::bitmask::{BitMaskApplicator}};
+use crate::{utils};
+use utils::bitmask::BitMaskApplicator;
 
 pub enum BitField {
     Next(u32),

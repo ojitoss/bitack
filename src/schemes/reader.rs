@@ -1,4 +1,6 @@
-use crate::{BitScheme, fields, utils::bitmask::MaskChunks};
+use crate::{BitScheme, fields, utils};
+use fields::ResolverType;
+use utils::bitmask::MaskChunks;
 
 pub struct Reader<'a> {
     pub bytes_added: i32,
@@ -11,13 +13,17 @@ impl Reader<'_> {
         let byte_index = ((index as f64) / 4.0).trunc() as usize;
         let byte = self.bytes[byte_index];
         let resolver = &self.target.masks[index];
+        
         let mask = resolver.applicator.mask;
-        let MaskChunks { left, bits, right } = resolver.applicator.get_chunks();
+        let MaskChunks { left, right, .. } = resolver.applicator.get_chunks();
+
+        let apply_mask = byte & mask;
+        let mask_to_left = apply_mask << left;
 
         match resolver.resolver {
-            fields::ResolverType::Base => (byte & mask) >> right,
-            fields::ResolverType::LeadingOnes => ((byte & mask) << left).leading_ones(),
-            fields::ResolverType::LeadingZeros => ((byte & mask) << left).leading_zeros(),
+            ResolverType::Base => apply_mask >> right,
+            ResolverType::LeadingOnes => mask_to_left.leading_ones(),
+            ResolverType::LeadingZeros => mask_to_left.leading_zeros(),
         }
     }
 }

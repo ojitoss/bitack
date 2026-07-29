@@ -60,7 +60,7 @@ impl BitScheme {
             let byte = bytes[i];
             let resolver = &self.masks[i];
             let applicator = &resolver.applicator;
-            let MaskChunks { left, bits, right } = applicator.get_chunks();
+            let MaskChunks { left, bits, .. } = applicator.get_chunks();
 
             match resolver.resolver {
                 fields::ResolverType::Base => {
