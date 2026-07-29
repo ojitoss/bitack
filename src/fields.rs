@@ -44,7 +44,7 @@ impl BitField {
         let resolver = {
             if let BitField::Skip(..) = self { None }
             else { Some(Resolver {
-                    applicator: BitMaskApplicator::from_left(bits as usize, acc),
+                    applicator: BitMaskApplicator::new(bits as usize, acc),
                     resolver: resolver
                 })
             }
