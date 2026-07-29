@@ -4,7 +4,7 @@ mod writter;
 use reader::Reader;
 use writter::Writter;
 
-use crate::fields;
+use crate::{fields, utils::bitmask::MaskChunks};
 
 pub struct BitScheme {
     masks: Vec<fields::Resolver>
@@ -59,29 +59,31 @@ impl BitScheme {
         for i in 0..bytes.len() {
             let byte = bytes[i];
             let resolver = &self.masks[i];
+            let applicator = &resolver.applicator;
+            let MaskChunks { left, bits, right } = applicator.get_chunks();
 
-            match resolver {
-                fields::Resolver::Base { shift, bits_amount, .. } => {
-                    let mask = byte << shift;
+            match resolver.resolver {
+                fields::ResolverType::Base => {
+                    let mask = byte << (applicator.bits_len_diff - left);
+                    let mask = mask & applicator.mask;
 
-                    Writter::write_in_loop(&mut write_bytes, acc, chunk, mask, *bits_amount);
-                },
-                fields::Resolver::LeadingOnes { mask, bits_amount, .. } => {
-                    let left = mask.leading_zeros();
-                    let mut mask = *mask;
+                    Writter::write_in_loop(&mut write_bytes, acc, chunk, mask, bits);
+                }
+                fields::ResolverType::LeadingOnes => {
+                    let mut mask = applicator.mask;
 
-                    for i in ((left + byte)..(bits_amount + left)).rev() {
+                    for i in ((left + byte)..(bits + left)).rev() {
                         let pos: u32 = 1 << (31 - i);
                         mask &= !pos;
                     }
 
-                    Writter::write_in_loop(&mut write_bytes, acc, chunk, mask, *bits_amount);
-                },
-                fields::Resolver::LeadingZeros { bits_amount, shift, .. } => {
-                    let mask = 0 | (1 << (31 - (shift + byte)));
+                    Writter::write_in_loop(&mut write_bytes, acc, chunk, mask, bits);
+                }
+                fields::ResolverType::LeadingZeros => {
+                    let mask = 0 | (1 << (31 - (left + byte)));
 
-                    Writter::write_in_loop(&mut write_bytes, acc, chunk, mask, *bits_amount);
-                }, 
+                    Writter::write_in_loop(&mut write_bytes, acc, chunk, mask, bits);
+                }
             }
 
             if acc >= 32 {

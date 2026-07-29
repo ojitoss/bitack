@@ -1,4 +1,5 @@
 use bitack::{BitScheme, BitField};
+
 #[test]
 fn reader_and_writter() {
     let scheme = BitScheme::new(vec![
@@ -50,6 +51,7 @@ fn padding_len() {
 
     for i in 0..5 {
         zeros.push(0);
+
         let consume = scheme.read(zeros.clone());
         let case = cases[i];
 

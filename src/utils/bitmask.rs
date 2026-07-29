@@ -1,7 +1,13 @@
 use crate::utils::traits::{BitUint};
 
+pub(crate) struct MaskChunks {
+    pub(crate) left: u32,
+    pub(crate) bits: u32,
+    pub(crate) right: u32
+}
+
 pub(crate) struct BitMaskApplicator<T: BitUint> {
-    pub(crate) shift: usize,
+    pub(crate) bits_len_diff: u32,
     pub(crate) mask: T,
 }
 
@@ -12,23 +18,41 @@ pub(crate) enum BitShiftDirection {
 }
 
 impl<T: BitUint> BitMaskApplicator<T> {
-    fn new(bits_amount: usize, shift_type: BitShiftDirection) -> Self {
-        let shift = T::BITS - bits_amount;
+    fn new(bits_amount: usize, shift_type: BitShiftDirection, acc: u32) -> Self {
+        let bits_len_diff = T::BITS - bits_amount;
 
         let mask = match shift_type {
-            BitShiftDirection::Left => T::MAX << shift,
-            BitShiftDirection::Right => T::MAX >> shift
+            BitShiftDirection::Left => {
+                let left_most_mask =  T::MAX << bits_len_diff;
+
+                left_most_mask >> (acc as usize)
+            }
+            BitShiftDirection::Right => {
+                let right_most_mask = T::MAX >> bits_len_diff;
+
+                right_most_mask << (acc as usize)
+            }
         };
 
-        Self { shift, mask }
+        let bits_len_diff = bits_len_diff as u32;
+
+        Self { bits_len_diff, mask }
     }
 
-    pub fn from_left(bits_amount: usize) -> Self {
-        Self::new(bits_amount, BitShiftDirection::Left)
+    pub fn from_left(bits_amount: usize, acc: u32) -> Self {
+        Self::new(bits_amount, BitShiftDirection::Left, acc)
     }
 
-    pub fn from_right(bits_amount: usize) -> Self {
-        Self::new(bits_amount, BitShiftDirection::Right)
+    pub fn from_right(bits_amount: usize, acc: u32) -> Self {
+        Self::new(bits_amount, BitShiftDirection::Right, acc)
+    }
+
+    pub fn get_chunks(&self) -> MaskChunks {
+        let left = self.mask.leading_zeros();
+        let bits = (self.mask << (left as usize)).leading_ones();
+        let right = 32 - (left + bits);
+
+        MaskChunks { left, bits, right }
     }
 }
 
@@ -37,10 +61,10 @@ mod test {
     use super::*;
 
     fn bitsmak_pattern_uints<T>(cases: Vec<(usize, usize, T)>, shift_type: BitShiftDirection)  where T: BitUint {
-        for (bits, shift, mask) in cases {
-            let result = BitMaskApplicator::<T>::new(bits, shift_type);
+        for (bits, bits_len_diff, mask) in cases {
+            let result = BitMaskApplicator::<T>::new(bits, shift_type, 0);
 
-            assert_eq!(shift, result.shift);
+            assert_eq!(bits_len_diff, result.bits_len_diff as usize);
             assert_eq!(mask, result.mask);
         }
     }

@@ -1,4 +1,4 @@
-use crate::{utils::bitmask::BitMaskApplicator};
+use crate::{utils::bitmask::{BitMaskApplicator}};
 
 pub enum BitField {
     Next(u32),
@@ -7,22 +7,15 @@ pub enum BitField {
     LeadingOnes(u32)
 }
 
-pub(crate) enum Resolver {
-    Base {
-        shift: u32,
-        mask: u32,
-        bits_amount: u32
-    },
-    LeadingOnes {
-        shift: u32,
-        mask: u32,
-        bits_amount: u32
-    },
-    LeadingZeros {
-        shift: u32,
-        mask: u32,
-        bits_amount: u32
-    },
+pub(crate) struct Resolver {
+    pub(crate) applicator: BitMaskApplicator<u32>,
+    pub(crate) resolver: ResolverType,
+}
+
+pub(crate) enum ResolverType {
+    Base,
+    LeadingOnes,
+    LeadingZeros,
 }
 
 pub(crate) struct ResolverOutput {
@@ -35,12 +28,10 @@ impl BitField {
         match self {
             BitField::Next(bits_amount) => {
                 let bits_amount = *bits_amount;
-                let mask_info = BitMaskApplicator::<u32>::from_right(bits_amount as usize);
 
-                let resolver = Resolver::Base {
-                    shift: (mask_info.shift - (acc as usize)) as u32,
-                    mask: mask_info.mask,
-                    bits_amount
+                let resolver = Resolver {
+                    applicator: BitMaskApplicator::<u32>::from_left(bits_amount as usize, acc),
+                    resolver: ResolverType::Base
                 };
 
                 ResolverOutput {
@@ -56,12 +47,10 @@ impl BitField {
             },
             BitField::LeadingOnes(bits_amount) => {
                 let bits_amount = *bits_amount;
-                let mask_info = BitMaskApplicator::<u32>::from_left(bits_amount as usize);
 
-                let resolver = Resolver::LeadingOnes { 
-                    shift: acc,
-                    mask: mask_info.mask >> acc,
-                    bits_amount
+                let resolver = Resolver {
+                    applicator: BitMaskApplicator::<u32>::from_left(bits_amount as usize, acc),
+                    resolver: ResolverType::LeadingOnes
                  };
 
                 ResolverOutput { 
@@ -71,12 +60,10 @@ impl BitField {
             },
             BitField::LeadingZeros(bits_amount) => {
                 let bits_amount = *bits_amount;
-                let mask_info = BitMaskApplicator::<u32>::from_left(bits_amount as usize);
 
-                let resolver = Resolver::LeadingZeros { 
-                    shift: acc,
-                    mask: mask_info.mask >> acc,
-                    bits_amount
+                let resolver = Resolver {
+                    applicator: BitMaskApplicator::<u32>::from_left(bits_amount as usize, acc),
+                    resolver: ResolverType::LeadingZeros
                  };
 
                 ResolverOutput { 
@@ -92,33 +79,28 @@ impl BitField {
 mod test {
     use super::*;
 
-    fn unwrap_resolver_info(resolver: &ResolverOutput) -> (u32, u32) {
-        if let Some(type_resolver) = &resolver.resolver {
-            match type_resolver {
-                Resolver::Base { mask, shift, .. } => { return (*mask, *shift) },
-                Resolver::LeadingOnes { shift, mask, .. } => { return (*mask, *shift) }
-                Resolver::LeadingZeros { shift, mask, .. } => { return (*mask, *shift) }
-            }
+    fn unwrap_resolver_info(resolver: &ResolverOutput) -> u32 {
+        if let Some(resolver) = &resolver.resolver {
+            return resolver.applicator.mask;
         }
 
-        (0, 0)
+        0
     }
 
     #[test]
     fn resolver() {
         let cases = vec![
-            (BitField::Next(8).resolve(0), 0xFF, 24),
-            (BitField::Next(3).resolve(0), 0b111, 29),
-            (BitField::Next(3).resolve(5), 0b111, 24),
-            (BitField::LeadingOnes(4).resolve(0), 0xF0_00_00_00, 0),
-            (BitField::LeadingZeros(4).resolve(8), 0x00_F0_00_00, 8),
+            (BitField::Next(8).resolve(0), 0xFF << 24),
+            (BitField::Next(3).resolve(0), 0xE0 << 24),
+            (BitField::Next(3).resolve(16), 0xE0 << 8),
+            (BitField::LeadingOnes(4).resolve(0), 0xF0 << 24),
+            (BitField::LeadingZeros(4).resolve(8), 0xF0 << 16),
         ];
         
-        for (resolver, expected_mask, expected_shift) in cases {
-            let (mask, shift) = unwrap_resolver_info(&resolver);
+        for (resolver, expected_mask) in cases {
+            let mask = unwrap_resolver_info(&resolver);
             
             assert_eq!(expected_mask, mask);
-            assert_eq!(expected_shift, shift);
         }
     }
 }
