@@ -26,52 +26,33 @@ pub(crate) struct ResolverOutput {
 
 impl BitField {
     pub fn resolve(&self, acc: u32) -> ResolverOutput {
-        match self {
-            BitField::Next(bits_amount) => {
-                let bits_amount = *bits_amount;
+        let bits = match self {
+            BitField::Next(b)
+            | BitField::Skip(b)
+            | BitField::LeadingOnes(b)
+            | BitField::LeadingZeros(b)
+            => *b
+        };
 
-                let resolver = Resolver {
-                    applicator: BitMaskApplicator::<u32>::from_left(bits_amount as usize, acc),
-                    resolver: ResolverType::Base
-                };
+        let resolver = match self {
+            BitField::Next(..) => ResolverType::Base,
+            BitField::LeadingOnes(..) => ResolverType::LeadingOnes,
+            BitField::LeadingZeros(..) => ResolverType::LeadingZeros,
+            _ => ResolverType::Base
+        };
 
-                ResolverOutput {
-                    resolver: Some(resolver),
-                    acc: acc + bits_amount
-                }
-            },
-            BitField::Skip(bits_amount) => {
-                ResolverOutput {
-                    resolver: None,
-                    acc: acc + bits_amount
-                }
-            },
-            BitField::LeadingOnes(bits_amount) => {
-                let bits_amount = *bits_amount;
+        let resolver = {
+            if let BitField::Skip(..) = self { None }
+            else { Some(Resolver {
+                    applicator: BitMaskApplicator::from_left(bits as usize, acc),
+                    resolver: resolver
+                })
+            }
+        };
 
-                let resolver = Resolver {
-                    applicator: BitMaskApplicator::<u32>::from_left(bits_amount as usize, acc),
-                    resolver: ResolverType::LeadingOnes
-                 };
-
-                ResolverOutput { 
-                    resolver: Some(resolver), 
-                    acc: acc + bits_amount
-                }
-            },
-            BitField::LeadingZeros(bits_amount) => {
-                let bits_amount = *bits_amount;
-
-                let resolver = Resolver {
-                    applicator: BitMaskApplicator::<u32>::from_left(bits_amount as usize, acc),
-                    resolver: ResolverType::LeadingZeros
-                 };
-
-                ResolverOutput { 
-                    resolver: Some(resolver), 
-                    acc: acc + bits_amount,
-                }
-            },
+        ResolverOutput { 
+            resolver,
+            acc: acc + bits
         }
     }
 }
