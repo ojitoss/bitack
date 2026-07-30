@@ -29,7 +29,7 @@ impl BitScheme {
         Self { masks }
     }
 
-    pub fn read(&self, origin_bytes: Vec<u8>) -> Reader {
+    pub fn read(&self, origin_bytes: Vec<u8>) -> Reader<'_> {
         let mut bytes = origin_bytes.clone();
         
         // Add padding at the bytes to can be compressed exactly.
