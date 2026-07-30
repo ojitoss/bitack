@@ -10,10 +10,9 @@ pub struct Reader<'a> {
 
 impl Reader<'_> {
     pub fn get(&self, index: usize) -> u32 {
-        let byte_index = ((index as f64) / 4.0).trunc() as usize;
-        let byte = self.bytes[byte_index];
+        let byte = self.bytes[0];
         let resolver = &self.target.masks[index];
-        
+
         let mask = resolver.applicator.mask;
         let MaskChunks { left, right, .. } = resolver.applicator.get_chunks();
 

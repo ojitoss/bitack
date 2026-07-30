@@ -7,19 +7,23 @@ fn reader_and_writter() {
         BitField::Next(6),
         BitField::Skip(4),
         BitField::Next(4),
+        BitField::LeadingOnes(4),
+        BitField::LeadingZeros(4)
     ]);
 
     let origin_bytes = vec![
         0b10_000010,
         0b0000_1111,
-        0b0,
+        0b1110_0100,
         0b0
     ];
 
     let cases = vec![
         2,
         2,
-        15
+        15,
+        3, 
+        1
     ];
 
     let to_read_bytes = scheme.read(origin_bytes.clone());
