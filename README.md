@@ -3,13 +3,13 @@
 Allows describe how bits are arranged and provides utilities to serialize and deserialize binary data.
 
 ## Why use bitack?
-**Declarative:** Define binary formats as schemes instead of manually manipulating bits.
-**Safe:** Avoid error-prone bit shifting and masking operations.
-**Compact:** Designed for binary formats where every bit matters.
-**Flexible:** Supports reading and writing custom bit layouts.
+- **Declarative:** Define binary formats as schemes instead of manually manipulating bits.
+- **Safe:** Avoid error-prone bit shifting and masking operations.
+- **Compact:** Designed for binary formats where every bit matters.
+- **Flexible:** Supports reading and writing custom bit layouts.
 
 [![Crates.io](https://img.shields.io/crates/v/bitack.svg)](https://crates.io/crates/bitack)
-<!-- [![Documentation](https://docs.rs/bitack/badge.svg)](https://docs.rs/bitack) -->
+[![Documentation](https://docs.rs/bitack/badge.svg)](https://docs.rs/bitack)
 [![License](https://img.shields.io/crates/l/bitack.svg)]()
 
 ## Installation

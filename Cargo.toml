@@ -1,13 +1,13 @@
 [package]
 name = "bitack"
-version = "0.1.0"
+version = "0.1.1"
 edition = "2021"
 readme = "README.md"
 license = "MIT"
 description = "Library for defining and manipulating binary formats using declarative bit schemes."
 repository = "https://github.com/ojitoss/bitack"
 homepage = "https://github.com/ojitoss/bitack"
-# documentation = "https://docs.rs/bitack"
+documentation = "https://docs.rs/bitack"
 keywords = ["bits", "binary", "serialization", "bitfield", "format"]
 categories = ["encoding", "data-structures"]
 
