@@ -8,20 +8,20 @@ pub enum BitField {
     LeadingOnes(u32)
 }
 
-pub(crate) struct Resolver {
-    pub(crate) applicator: BitMaskApplicator<u32>,
-    pub(crate) resolver: ResolverType,
+pub struct Resolver {
+    pub applicator: BitMaskApplicator<u32>,
+    pub resolver: ResolverType,
 }
 
-pub(crate) enum ResolverType {
+pub enum ResolverType {
     Base,
     LeadingOnes,
     LeadingZeros,
 }
 
-pub(crate) struct ResolverOutput {
-    pub(crate) resolver: Option<Resolver>,
-    pub(crate) acc: u32
+pub struct ResolverOutput {
+    pub resolver: Option<Resolver>,
+    pub acc: u32
 }
 
 impl BitField {

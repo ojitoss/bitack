@@ -1,14 +1,14 @@
 use crate::utils::traits::{BitUint};
 
-pub(crate) struct MaskChunks {
-    pub(crate) left: u32,
-    pub(crate) bits: u32,
-    pub(crate) right: u32
+pub struct MaskChunks {
+    pub left: u32,
+    pub bits: u32,
+    pub right: u32
 }
 
-pub(crate) struct BitMaskApplicator<T: BitUint> {
-    pub(crate) bits_len_diff: u32,
-    pub(crate) mask: T,
+pub struct BitMaskApplicator<T: BitUint> {
+    pub bits_len_diff: u32,
+    pub mask: T,
 }
 
 impl<T: BitUint> BitMaskApplicator<T> {

@@ -4,3 +4,4 @@ pub(crate) mod utils;
 
 pub use schemes::BitScheme;
 pub use fields::BitField;
+pub use utils::bitmask::{BitMaskApplicator};

@@ -1,6 +1,6 @@
 use std::{fmt::Debug, ops::{BitOr, Shl, Shr}};
 
-pub(crate) trait BitUint:
+pub trait BitUint:
     Copy
     + From<u8>
     + BitOr<Output = Self>
