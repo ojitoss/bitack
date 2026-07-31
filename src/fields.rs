@@ -44,15 +44,18 @@ impl BitField {
             BitField::LeadingZeros(..) => Some(ResolverType::LeadingZeros),
         };
 
-        let resolver_option = if let Some(resolver) = resolver {
-            Some(Resolver {
-                applicator: BitMaskApplicator::new(bits as usize, acc),
-                resolver: resolver
-            })
-        } else { None };
+        let resolver = match resolver {
+            Some(resolver_type) => Some(
+                Resolver {
+                    applicator: BitMaskApplicator::new(bits as usize, acc),
+                    resolver: resolver_type
+                }
+            ),
+            None => None
+        };
 
         ResolverOutput { 
-            resolver: resolver_option,
+            resolver: resolver,
             acc: acc + bits
         }
     }
