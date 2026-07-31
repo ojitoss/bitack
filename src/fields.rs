@@ -25,33 +25,34 @@ pub struct ResolverOutput {
 }
 
 impl BitField {
-    pub fn resolve(&self, acc: u32) -> ResolverOutput {
-        let bits = match self {
+    pub fn get_bits(&self) -> u32 {
+        match self {
             BitField::Next(b)
             | BitField::Skip(b)
             | BitField::LeadingOnes(b)
             | BitField::LeadingZeros(b)
             => *b
-        };
+        }
+    }
+    pub fn resolve(&self, acc: u32) -> ResolverOutput {
+        let bits = self.get_bits();
 
         let resolver = match self {
-            BitField::Next(..) => ResolverType::Base,
-            BitField::LeadingOnes(..) => ResolverType::LeadingOnes,
-            BitField::LeadingZeros(..) => ResolverType::LeadingZeros,
-            _ => ResolverType::Base
+            BitField::Skip(..) => None,
+            BitField::Next(..) => Some(ResolverType::Base),
+            BitField::LeadingOnes(..) => Some(ResolverType::LeadingOnes),
+            BitField::LeadingZeros(..) => Some(ResolverType::LeadingZeros),
         };
 
-        let resolver = {
-            if let BitField::Skip(..) = self { None }
-            else { Some(Resolver {
-                    applicator: BitMaskApplicator::new(bits as usize, acc),
-                    resolver: resolver
-                })
-            }
-        };
+        let resolver_option = if let Some(resolver) = resolver {
+            Some(Resolver {
+                applicator: BitMaskApplicator::new(bits as usize, acc),
+                resolver: resolver
+            })
+        } else { None };
 
         ResolverOutput { 
-            resolver,
+            resolver: resolver_option,
             acc: acc + bits
         }
     }
