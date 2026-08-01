@@ -1,5 +1,5 @@
-use crate::{utils};
-use utils::bitmask::BitMaskApplicator;
+use crate::utils::{self};
+use utils::bitmask::{BitMaskApplicator, MaskChunks};
 
 pub enum BitField {
     Next(u32),
@@ -34,6 +34,7 @@ impl BitField {
             => *b
         }
     }
+
     pub fn resolve(&self, acc: u32) -> ResolverOutput {
         let bits = self.get_bits();
 
@@ -57,6 +58,45 @@ impl BitField {
         ResolverOutput { 
             resolver: resolver,
             acc: acc + bits
+        }
+    }
+    
+    pub fn write_mask(&self, value: u32) -> u32 {
+        let resolver = self.resolve(0);
+
+        match resolver.resolver {
+            Some(resolver) => resolver.create_mask_to_apply(value),
+            None => 0
+        }
+    }
+}
+
+impl Resolver {
+    pub fn create_mask_to_apply(&self, byte: u32) -> u32 {
+        let applicator = &self.applicator;
+        let MaskChunks { left, bits, .. } = applicator.get_chunks();
+
+        match self.resolver {
+            ResolverType::Base => {
+                let mask = byte << (applicator.bits_len_diff - left);
+                    
+                mask & applicator.mask
+            }
+            ResolverType::LeadingOnes => {
+                let mut mask = applicator.mask;
+
+                for i in ((left + byte)..(bits + left)).rev() {
+                    let pos: u32 = 1 << (31 - i);
+                    mask &= !pos;
+                }
+
+                mask
+            }
+            ResolverType::LeadingZeros => {
+                let cut_point = 1 << (31 - (left + byte));
+
+                0 | cut_point
+            }
         }
     }
 }

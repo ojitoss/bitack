@@ -1,10 +1,10 @@
-mod reader;
-mod writter;
+pub mod reader;
+pub mod writter;
 
 use reader::Reader;
 use writter::Writter;
 
-use crate::{fields, utils::bitmask::MaskChunks};
+use crate::{fields};
 
 pub struct BitScheme {
     masks: Vec<fields::Resolver>
@@ -60,32 +60,9 @@ impl BitScheme {
             let byte = bytes[i];
             let resolver = &self.masks[i];
             let applicator = &resolver.applicator;
-            let MaskChunks { left, bits, .. } = applicator.get_chunks();
+            let bits = applicator.get_chunks().bits;
 
-            let mask = match resolver.resolver {
-                fields::ResolverType::Base => {
-                    let mask = byte << (applicator.bits_len_diff - left);
-                    
-                    mask & applicator.mask
-                }
-                fields::ResolverType::LeadingOnes => {
-                    let mut mask = applicator.mask;
-
-                    for i in ((left + byte)..(bits + left)).rev() {
-                        let pos: u32 = 1 << (31 - i);
-                        mask &= !pos;
-                    }
-
-                    mask
-                }
-                fields::ResolverType::LeadingZeros => {
-                    let cut_point = 1 << (31 - (left + byte));
-
-                    0 | cut_point
-                }
-            };
-
-            Writter::write_in_loop(&mut write_bytes, chunk, mask);
+            Writter::write_in_loop(&mut write_bytes, chunk, resolver.create_mask_to_apply(byte));
             
             acc += bits;
 
