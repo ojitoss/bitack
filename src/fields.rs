@@ -61,7 +61,7 @@ impl BitField {
         }
     }
     
-    pub fn write_mask(&self, value: u32) -> u32 {
+    pub fn write(&self, value: u32) -> u32 {
         let resolver = self.resolve(0);
 
         match resolver.resolver {
@@ -126,6 +126,22 @@ mod test {
         for (resolver, expected_mask) in cases {
             let mask = unwrap_resolver_info(&resolver);
             
+            assert_eq!(expected_mask, mask);
+        }
+    }
+
+    #[test]
+    fn write() {
+        let cases: Vec<(BitField, u32)> = vec![
+            (BitField::Skip(16), 0),
+            (BitField::Next(16), 0x0008 << 16),
+            (BitField::LeadingOnes(16), 0xFF00 << 16),
+            (BitField::LeadingZeros(16), 0x0080 << 16)
+        ];
+
+        for (field, expected_mask) in cases {
+            let mask = field.write(8);
+
             assert_eq!(expected_mask, mask);
         }
     }
